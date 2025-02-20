@@ -5,12 +5,17 @@ import mlflow.sklearn
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.linear_model import Ridge, Lasso, ElasticNet
+from src.Utils.Utils import load_yaml
 
 class ModelTrainerClass:
     def __init__(self, X_train_path, y_train_path, params_path):
         self.X_train_path = X_train_path
         self.y_train_path = y_train_path
         self.params_path = params_path
+        
+        self.load_yaml = load_yaml
+        self.data = self.load_yaml(yaml_path="constants.yaml")
+        self.CrossValidation =  self.load_yaml['trainTestSplit']['CrossValidation']
         
     def load_X_train(self):
         X_train = pd.read_csv(self.X_train_path)
@@ -35,7 +40,7 @@ class ModelTrainerClass:
         return model
     
     def train_model(self, model, param_grid):
-        random_search = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=5)
+        random_search = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=self.CrossValidation)
         random_search.fit(self.X_train, self.y_train)
 
         best_model = random_search.best_estimator_

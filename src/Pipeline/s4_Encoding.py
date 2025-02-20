@@ -1,83 +1,86 @@
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler, MinMaxScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import make_pipeline
+from src.Utils.Utils import load_yaml,get_class,get_class_Scaler
+
 
 class EncodingAndScalingClass:
-    def __init__(self, file_path: str):
-        self.df = pd.read_csv(file_path)
-        self.df = self.df.drop('Unnamed: 0', axis=1, errors='ignore')
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-        self.pipe = self.encoding_and_scaling()
+    def __init__(self):
+        self.load_yaml = load_yaml
+        self.get_class = get_class
+        self.data = self.load_yaml(yaml_path="constants.yaml")
+        
+        # TrainTest Split
+        self.testSize = self.data['trainTestSplit']['testSize']
+        self.randomState = self.data['trainTestSplit']['randomState']
 
-    def read_file(self):
-        self.df = self.df.drop('Unnamed: 0', axis=1, errors='ignore')
-        return self.df
-    
-    def split_df_to_X_y(self):
-        x = self.df.drop(['Price'], axis=1)
-        y = self.df['Price']
-        return x, y
-    
-    def train_test_split(self, x, y):
-        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
-        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test
+        # MinMax and Standard Scalaer Variable
+        self.scaling = self.data['scaling']['scalingFeature']
+        self.scalling = get_class_Scaler(self.scaling)
+
+
+    def read_file(self, file_path):
+        df = pd.read_csv(file_path,index_col=False)
+        
+        #df.drop(columns=['Unnamed: 0'], errors='ignore', inplace=True)
+        #df = df.reset_index(drop=True)
+        df = df[['Airline','Source','Destination','Total_Stops','Day','Month','Year','Dept_Hour','Dept_Minute','Arr_Hour','Arr_Minute','hoursMinutes','Price']]
+        print("-------------------------------------------------------------------------")
+        return df
+
+    def split_df_to_X_y(self, df):
+        X = df.drop(columns=['Price'])
+        y = df['Price']
+        return X, y
+
+    def train_test_split(self, X, y):
+        return train_test_split(X, y, test_size=self.testSize, random_state=self.randomState)
 
     def encoding_and_scaling(self):
         trf1 = ColumnTransformer([
-            ('OneHot', OneHotEncoder(drop='first', handle_unknown='ignore'),[0,1,2])
+            ('OneHot', OneHotEncoder(drop='first', handle_unknown='ignore'), [0,1,2])
         ], remainder='passthrough')
 
         trf2 = ColumnTransformer([
-            ('Ordinal', OrdinalEncoder(categories=[['non-stop', '1 stop', '2 stops', '3 stops', '4 stops']]),[16])
+            ('Ordinal', OrdinalEncoder(categories=[['non-stop', '1 stop', '2 stops', '3 stops', '4 stops']]), [15])
         ], remainder='passthrough')
 
         trf3 = ColumnTransformer([
-            ('scale', StandardScaler(), slice(25))
+            ('scale', self.scalling, slice(25))  # Scale first 25 columns
         ])
 
-        pipe = make_pipeline(trf1, trf2, trf3)
-        return pipe
-                        
-    def save_X_train(self):
-        x_train_transformed = self.pipe.fit_transform(self.X_train)
-        x_train_transformed = pd.DataFrame(x_train_transformed)
-        x_train_transformed.to_csv('Data/04_Encoded_Data/X_train.csv', index=False)
-
-    def save_X_test(self):
-        x_test_transformed = self.pipe.transform(self.X_test)
-        x_test_transformed = pd.DataFrame(x_test_transformed)
-        x_test_transformed.to_csv('Data/04_Encoded_Data/X_test.csv', index=False)
-
-    def save_y_train(self):
-        self.y_train.to_csv('Data/04_Encoded_Data/y_train.csv', index=False)
-
-    def save_y_test(self):
-        self.y_test.to_csv('Data/04_Encoded_Data/y_test.csv', index=False)
-
+        return make_pipeline(trf1,trf2,trf3)
+        #return make_pipeline(trf1, trf2, trf3)
+        #return make_pipeline(trf1, trf2, trf3)
+    
+    def transform_X_train(self, pipe, X_train):
+        
+        print(self.scalling)
+        return pd.DataFrame(pipe.fit_transform(X_train))
+    
+    def transform_X_test(self, pipe, X_test):
+        return pd.DataFrame(pipe.transform(X_test))
+    
+    def save_dataframe(self, df, file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        df.to_csv(file_path, index=False)
 
 if __name__ == "__main__":
-    file_path = 'Data/03_noOutlierData/noOutlierDataFile.csv'
-    encoding_and_scaling_obj = EncodingAndScalingClass(file_path)
-
-    encoding_and_scaling_obj.read_file()
-
-    x, y = encoding_and_scaling_obj.split_df_to_X_y()
-
-    encoding_and_scaling_obj.train_test_split(x, y)
-
-    encoding_and_scaling_obj.save_X_train()
-    encoding_and_scaling_obj.save_X_test()
-    encoding_and_scaling_obj.save_y_train()
-    encoding_and_scaling_obj.save_y_test() 
-
+    file_path = "Data/03_noOutlierData/noOutlierDataFile.csv"
+    obj = EncodingAndScalingClass()
+    df = obj.read_file(file_path)
+    X, y = obj.split_df_to_X_y(df)
+    X_train, X_test, y_train, y_test = obj.train_test_split(X, y)
+    print(X_train)
+    pipe = obj.encoding_and_scaling()
+    X_train_transformed = obj.transform_X_train(pipe, X_train)
     
-
-
-
-
+    X_test_transformed = obj.transform_X_test(pipe, X_test)
     
+    obj.save_dataframe(X_train_transformed, "Data/04_encoded_Data/X_train.csv")
+    obj.save_dataframe(X_test_transformed, "Data/04_encoded_Data/X_test.csv")
+    obj.save_dataframe(y_train, "Data/04_encoded_Data/y_train.csv")
+    obj.save_dataframe(y_test, "Data/04_encoded_Data/y_test.csv")

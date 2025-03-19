@@ -1,11 +1,13 @@
 import pandas as pd
+import os
 import yaml
 import numpy as np 
 import mlflow.sklearn
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.linear_model import Ridge, Lasso, ElasticNet
-from src.Utils.Utils import load_yaml
+from src.Utils.Utils import load_yaml, get_class, get_class_Scaler
+import json
 
 class ModelTrainerClass:
     def __init__(self, X_train_path, y_train_path, params_path):
@@ -13,9 +15,9 @@ class ModelTrainerClass:
         self.y_train_path = y_train_path
         self.params_path = params_path
         
-        self.load_yaml = load_yaml
-        self.data = self.load_yaml(yaml_path="constants.yaml")
-        self.CrossValidation =  self.load_yaml['trainTestSplit']['CrossValidation']
+        # self.load_yaml = load_yaml
+        # self.data = self.load_yaml(yaml_path="constants.yaml")
+        # self.CrossValidation =  self.data['trainTestSplit']['CrossValidation']
         
     def load_X_train(self):
         X_train = pd.read_csv(self.X_train_path)
@@ -37,10 +39,10 @@ class ModelTrainerClass:
     def get_Model_class(self, model):
         model_class = globals()[model.split('.')[-1]]
         model = model_class()
-        return model
+        return model 
     
     def train_model(self, model, param_grid):
-        random_search = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=self.CrossValidation)
+        random_search = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=5)
         random_search.fit(self.X_train, self.y_train)
 
         best_model = random_search.best_estimator_
@@ -73,8 +75,19 @@ class MLflowLoggerClass:
         self.tracking_uri = tracking_uri
         mlflow.set_tracking_uri(self.tracking_uri)
 
+
+    def save_model_info(self, run_id: str, model_path: str, file_path: str) -> None:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        model_info = {'run_id': run_id, 'model_path': model_path}
+
+        with open(file_path, 'w') as file:
+            json.dump(model_info, file, indent=4)
+                        
+
+
     def  log_results(self, model_name, best_model, best_params, mse, mae, rmse, r2, ar2):
-        with mlflow.start_run(run_name=model_name):
+        with mlflow.start_run(run_name=model_name) as run:
             mlflow.log_metric("MSE", mse)
             mlflow.log_metric("MAE", mae)
             mlflow.log_metric("RMSE", rmse)
@@ -85,6 +98,10 @@ class MLflowLoggerClass:
                 mlflow.log_param(f"Best {param_name}", param_value)
 
             mlflow.sklearn.log_model(best_model, f"{model_name}_model")
+            print(run.info.run_id)
+
+            self.save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
+
 
             print(f"MSE: {mse}")
             print(f"MAE: {mae}")
@@ -99,16 +116,15 @@ if __name__ == "__main__":
     X_train_path = 'Data/04_Encoded_Data/X_train.csv'
     y_train_path = 'Data/04_Encoded_Data/y_train.csv'
     params_path = "modelsParams.yaml"
+    tracking_uri = "http://localhost:5000"
 
     ModelTrainerObj = ModelTrainerClass(X_train_path, y_train_path, params_path)
+
     X_train = ModelTrainerObj.load_X_train()
     y_train = ModelTrainerObj.load_y_train()
     modelWithParams = ModelTrainerObj.load_params()
     print("------------------------------")
     
-
-    tracking_uri = "http://localhost:5000" 
-    MLFlowLoggerObj = MLflowLoggerClass(tracking_uri)
     
     for value in modelWithParams.values():
         model = value['model']
@@ -125,7 +141,7 @@ if __name__ == "__main__":
         model_name = ModelTrainerObj.get_Model_Name(model)
         print(f"Model Name: {model_name}")
 
-       
+        MLFlowLoggerObj = MLflowLoggerClass(tracking_uri)
         MLFlowLoggerObj.log_results(model_name, best_model, best_params, mse, mae, rmse, r2, ar2)
 
 

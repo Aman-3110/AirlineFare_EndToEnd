@@ -40,7 +40,7 @@ class RemoveOutliersClass:
 
 if __name__ == "__main__":
     file_path = 'Data/02_CleanedData/CleanedData.csv'
-    yaml_path = "contants.yaml"
+    yaml_path = "constants.yaml"
     noOutlierDataFilePath = 'Data/03_noOutlierData/noOutlierDataFile.csv'
 
     RemoveOutliersObj = RemoveOutliersClass(file_path, yaml_path)

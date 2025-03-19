@@ -1,0 +1,121 @@
+schema: '2.0'
+stages:
+  DataIngestion:
+    cmd: python src\Pipeline\s1_dataIngestion.py
+    deps:
+    - path: src\Pipeline\s1_dataIngestion.py
+      hash: md5
+      md5: 147a9754b54b3e550490056f9d3f2c16
+      size: 1996
+    outs:
+    - path: Data\01_RawData\Airline.csv
+      hash: md5
+      md5: e968031f6686a71a8ce6e4ce64b3c34e
+      size: 1089598
+  DataCleaning:
+    cmd: python src\Pipeline\s2_Data_Cleaning.py
+    deps:
+    - path: Data\01_RawData\Airline.csv
+      hash: md5
+      md5: e968031f6686a71a8ce6e4ce64b3c34e
+      size: 1089598
+    - path: src\Pipeline\s2_Data_Cleaning.py
+      hash: md5
+      md5: 90ce83d714aeee53082f4d2d776a2cca
+      size: 5056
+    outs:
+    - path: Data\02_CleanedData\CleanedData.csv
+      hash: md5
+      md5: 1f564a134f850c9169c5f38677e39a47
+      size: 688161
+  RemoveOutliers:
+    cmd: python src\Pipeline\s3_RemoveOutliers.py
+    deps:
+    - path: Data\02_CleanedData\CleanedData.csv
+      hash: md5
+      md5: 1f564a134f850c9169c5f38677e39a47
+      size: 688161
+    - path: src\Pipeline\s3_RemoveOutliers.py
+      hash: md5
+      md5: 3a044483c0eb7d014d6c6510c4c8f57f
+      size: 1919
+    outs:
+    - path: Data\03_noOutlierData\noOutlierDataFile.csv
+      hash: md5
+      md5: 1a6e5e9e0f69ab6bc58e743ce0e26254
+      size: 646439
+  Encoder_N_Scaler:
+    cmd: python src\Pipeline\s4_Encoding.py
+    deps:
+    - path: Data\03_noOutlierData\noOutlierDataFile.csv
+      hash: md5
+      md5: 1a6e5e9e0f69ab6bc58e743ce0e26254
+      size: 646439
+    - path: constants.yaml
+      hash: md5
+      md5: 0bf4fc755797b76feeb220606542451e
+      size: 484
+    - path: src\Pipeline\s4_Encoding.py
+      hash: md5
+      md5: c66c254fb51fce6ce2a7330cabf0f659
+      size: 3163
+    outs:
+    - path: Data\04_Encoded_Data\X_test.csv
+      hash: md5
+      md5: 1f9a170e97aaab18268d31df563f30cd
+      size: 595423
+    - path: Data\04_Encoded_Data\X_train.csv
+      hash: md5
+      md5: 8db36e5a0d3cfe37d13370837aed1269
+      size: 1391445
+    - path: Data\04_Encoded_Data\y_test.csv
+      hash: md5
+      md5: 5805ca7734be4da81f23da39b18f5b25
+      size: 19241
+    - path: Data\04_Encoded_Data\y_train.csv
+      hash: md5
+      md5: 30ba70b8938162a0b25dc6f8e9dd335c
+      size: 44991
+  Model_Training:
+    cmd: python src\Pipeline\s5_Model_Training.py
+    deps:
+    - path: Data\04_Encoded_Data\X_test.csv
+      hash: md5
+      md5: 1f9a170e97aaab18268d31df563f30cd
+      size: 595423
+    - path: Data\04_Encoded_Data\X_train.csv
+      hash: md5
+      md5: 8db36e5a0d3cfe37d13370837aed1269
+      size: 1391445
+    - path: Data\04_Encoded_Data\y_train.csv
+      hash: md5
+      md5: 30ba70b8938162a0b25dc6f8e9dd335c
+      size: 44991
+    - path: constants.yaml
+      hash: md5
+      md5: 0bf4fc755797b76feeb220606542451e
+      size: 484
+    - path: modelsParams.yaml
+      hash: md5
+      md5: f0ef17a70740a582a96c4b5b60457456
+      size: 371
+    - path: src\Pipeline\s5_Model_Training.py
+      hash: md5
+      md5: 714ee2830fb9f48fd354278977e0c918
+      size: 5188
+    outs:
+    - path: reports/experiment_info.json
+      hash: md5
+      md5: d64f50f4dcfff3e1e47333b625d75a93
+      size: 82
+  Register_Model:
+    cmd: python src\Pipeline\s6_register_model.py
+    deps:
+    - path: reports/experiment_info.json
+      hash: md5
+      md5: d64f50f4dcfff3e1e47333b625d75a93
+      size: 82
+    - path: src\Pipeline\s6_register_model.py
+      hash: md5
+      md5: ece82ce2dcd060a82e83d5730d4e209c
+      size: 1783

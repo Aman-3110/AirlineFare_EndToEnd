@@ -1,0 +1,5 @@
+dvc stage add
+-n Name_Of_Stage
+-d Dependent_File
+-o Output_Of_Stage
+python FileToRun

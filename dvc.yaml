@@ -1,0 +1,53 @@
+stages:
+  DataIngestion:
+    cmd: python src\Pipeline\s1_dataIngestion.py
+    deps:
+    - src\Pipeline\s1_dataIngestion.py
+    outs:
+    - Data\01_RawData\Airline.csv
+
+  DataCleaning:
+    cmd: python src\Pipeline\s2_Data_Cleaning.py
+    deps:
+    - Data\01_RawData\Airline.csv
+    - src\Pipeline\s2_Data_Cleaning.py
+    outs:
+    - Data\02_CleanedData\CleanedData.csv
+
+  RemoveOutliers:
+    cmd: python src\Pipeline\s3_RemoveOutliers.py
+    deps:
+    - Data\02_CleanedData\CleanedData.csv
+    - src\Pipeline\s3_RemoveOutliers.py
+    outs:
+    - Data\03_noOutlierData\noOutlierDataFile.csv
+
+  Encoder_N_Scaler:
+    cmd: python src\Pipeline\s4_Encoding.py
+    deps:
+    - Data\03_noOutlierData\noOutlierDataFile.csv
+    - src\Pipeline\s4_Encoding.py
+    - constants.yaml
+    outs:
+    - Data\04_Encoded_Data\X_test.csv
+    - Data\04_Encoded_Data\X_train.csv
+    - Data\04_Encoded_Data\y_test.csv
+    - Data\04_Encoded_Data\y_train.csv
+
+  Model_Training:
+    cmd: python src\Pipeline\s5_Model_Training.py
+    deps:
+    - constants.yaml
+    - modelsParams.yaml
+    - Data\04_Encoded_Data\X_test.csv
+    - Data\04_Encoded_Data\X_train.csv 
+    - Data\04_Encoded_Data\y_train.csv
+    - src\Pipeline\s5_Model_Training.py
+    outs:
+    - reports/experiment_info.json
+  
+  Register_Model:
+    cmd: python src\Pipeline\s6_register_model.py
+    deps:
+    - reports/experiment_info.json
+    - src\Pipeline\s6_register_model.py

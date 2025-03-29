@@ -3,4 +3,6 @@ pyyaml
 scikit-learn
 mlflow
 flask
+dagshub
+flask-cors
 -e .

@@ -6,8 +6,11 @@ import mlflow.sklearn
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.linear_model import Ridge, Lasso, ElasticNet
-from src.Utils.Utils import load_yaml, get_class, get_class_Scaler
+#from src.Utils.Utils import load_yaml, get_class, get_class_Scaler
 import json
+
+import mlflow
+import dagshub
 
 class ModelTrainerClass:
     def __init__(self, X_train_path, y_train_path, params_path):
@@ -71,9 +74,12 @@ class ModelTrainerClass:
     
 
 class MLflowLoggerClass:
-    def __init__(self, tracking_uri):
-        self.tracking_uri = tracking_uri
-        mlflow.set_tracking_uri(self.tracking_uri)
+    def __init__(self):
+        mlflow.set_tracking_uri('https://dagshub.com/Aman-3110/AirlineFare_EndToEnd.mlflow')
+        dagshub.init(repo_owner='Aman-3110',repo_name='AirlineFare_EndToEnd',mlflow=True)
+
+        # self.tracking_uri = tracking_uri
+        # mlflow.set_tracking_uri(self.tracking_uri)
 
 
     def save_model_info(self, run_id: str, model_path: str, file_path: str) -> None:
@@ -115,8 +121,9 @@ class MLflowLoggerClass:
 if __name__ == "__main__":
     X_train_path = 'Data/04_Encoded_Data/X_train.csv'
     y_train_path = 'Data/04_Encoded_Data/y_train.csv'
+
     params_path = "modelsParams.yaml"
-    tracking_uri = "http://localhost:5000"
+    tracking_uri = "https://dagshub.com/Aman-3110/AirlineFare_EndToEnd.mlflow"
 
     ModelTrainerObj = ModelTrainerClass(X_train_path, y_train_path, params_path)
 
@@ -141,7 +148,7 @@ if __name__ == "__main__":
         model_name = ModelTrainerObj.get_Model_Name(model)
         print(f"Model Name: {model_name}")
 
-        MLFlowLoggerObj = MLflowLoggerClass(tracking_uri)
+        MLFlowLoggerObj = MLflowLoggerClass()
         MLFlowLoggerObj.log_results(model_name, best_model, best_params, mse, mae, rmse, r2, ar2)
 
 

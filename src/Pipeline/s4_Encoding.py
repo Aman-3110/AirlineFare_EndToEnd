@@ -1,17 +1,24 @@
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler, MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import make_pipeline
-from src.Utils.Utils import load_yaml,get_class,get_class_Scaler
+from src.Utils.Utils import load_yaml, get_class, get_class_Scaler
 import pickle
+
+
+
 
 class EncodingAndScalingClass:
     def __init__(self):
+        yaml_path = os.path.join(os.path.dirname(__file__), "../../constants.yaml")
         self.load_yaml = load_yaml
         self.get_class = get_class
-        self.data = self.load_yaml(yaml_path="constants.yaml")
+        self.data = self.load_yaml(yaml_path=yaml_path)
         
         # TrainTest Split
         self.testSize = self.data['trainTestSplit']['testSize']
@@ -59,14 +66,14 @@ class EncodingAndScalingClass:
     def makeTransformerFile(self, pipe):
         with open('model/model_transform.pkl', 'wb') as file:
             pickle.dump(pipe, file)
-
-
+ 
+ 
     
     def save_dataframe(self, df, file_path):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         df.to_csv(file_path, index=False)
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     file_path = "Data/03_noOutlierData/noOutlierDataFile.csv"
     obj = EncodingAndScalingClass()
     df = obj.read_file(file_path)

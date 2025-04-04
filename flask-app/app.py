@@ -47,8 +47,11 @@ def home():
 @cross_origin()
 
 def predict():
+    if model is None:
+        return "Model not loaded. Please check the server logs for details.", 500
+    
     if request.method=="GET":
-        return render_template(home.html)
+        return render_template("home.html")
     
     elif request.method=="POST":
 

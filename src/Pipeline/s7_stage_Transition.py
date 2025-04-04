@@ -1,12 +1,10 @@
 import os
 import json
-
+import sys
 import mlflow
 import time
 import dagshub
-
-
-
+from src.Utils.exception import CustomException
 
 class ModelManager:
     """Class to manage model saving, loading, and registration with MLflow."""
@@ -25,33 +23,48 @@ class ModelManager:
 
     def load_model_info(self) -> dict:
         """Load the model info from a JSON file."""
-        if not os.path.exists(self.info_path):
-            raise FileNotFoundError(f"Model info file not found: {self.info_path}")
+        try:
+            if not os.path.exists(self.info_path):
+                raise FileNotFoundError(f"Model info file not found: {self.info_path}")
 
-        with open(self.info_path, 'r') as file:
-            return json.load(file)
+            with open(self.info_path, 'r') as file:
+                return json.load(file)
+        except Exception as e:
+            print(CustomException(e,sys))
+
 
     def register_model(self):
-        model_info = self.load_model_info()
-        model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
+        try:
+            model_info = self.load_model_info()
+            model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
 
-        # Register the model
-        model_version = self.client.create_model_version(
-            name=self.model_name,
-            source=model_uri,
-            run_id=model_info['run_id']
-        ).version
+            print("Registering model with URI:", model_uri)
 
-        # Transition to Staging
-        self.client.transition_model_version_stage(
-            name=self.model_name,
-            version=model_version,
-            stage="Staging",
-            archive_existing_versions=True
-        )
+            # Register the model and extract version number
+            model_version = mlflow.register_model(model_uri, self.model_name).version
+
+            print(f"Registered model '{self.model_name}' as version {model_version}")
+
+            # Ensure registration is complete before transitioning
+            time.sleep(5)  # Add delay to ensure visibility in MLflow
+
+            # Transition the model version
+            self.client.transition_model_version_stage(
+                name=self.model_name,
+                version=int(model_version),
+                stage="Staging",
+                archive_existing_versions=True
+            )
+
+            print(f"Model '{self.model_name}' version {model_version} moved to 'Staging'.")
+
+        except Exception as e:
+            print(CustomException(e, sys))
+
+
 
 if __name__ == '__main__':
-    model_name="Lasso_model"
+    model_name="Lasso"
     info_path='reports/experiment_info.json'
 
     model_manager = ModelManager(model_name, info_path)

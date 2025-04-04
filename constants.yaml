@@ -10,7 +10,7 @@ airlineName :
   Trujet : [0.00 , 0.00]
 
 trainTestSplit:
-  testSize : 0.30
+  testSize : 0.25
   randomState : 42
   CrossValidation : 5
 

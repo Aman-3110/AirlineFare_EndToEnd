@@ -14,11 +14,11 @@ class ModelManager:
         self.info_path = info_path
         self.client = mlflow.tracking.MlflowClient()
         
-        mlflow.set_tracking_uri('https://dagshub.com/Aman-3110/AirlineFare_EndToEnd.mlflow')
-
-        dagshub.init(repo_owner='Aman-3110',repo_name='AirlineFare_EndToEnd',mlflow=True)
-        # self.tracking_uri = "http://localhost:5000"
-        # mlflow.set_tracking_uri(self.tracking_uri)
+        # mlflow.set_tracking_uri("https://dagshub.com/SHIVRAJSHINDE/AirlineFare_EndToEnd.mlflow")
+        # dagshub.init(repo_owner='SHIVRAJSHINDE', repo_name='AirlineFare_EndToEnd', mlflow=True)
+    
+        self.tracking_uri = "http://localhost:5000"
+        mlflow.set_tracking_uri(self.tracking_uri)
 
 
     def load_model_info(self) -> dict:

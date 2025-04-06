@@ -152,23 +152,15 @@ class PredictionPipeline:
         return df
 
 
-    def process_duration(self, df: pd.DataFrame) -> pd.DataFrame:
+    def process_duration(self,df: pd.DataFrame) -> pd.DataFrame:
         """Converts 'Duration' column (format: '0 days HH:MM:SS') to total minutes."""
-
+        
+        # Function to convert '0 days HH:MM:SS' to total minutes
         def duration_to_minutes(duration_str: str) -> int:
-            try:
-                time_part = str(duration_str).split(' ')[-1]
-                parts = time_part.split(':')
-                if len(parts) == 3:
-                    hours, minutes, _ = parts
-                elif len(parts) == 2:
-                    hours, minutes = parts
-                else:
-                    return 0
-                return int(hours) * 60 + int(minutes)
-            except:
-                return 0
+            hours, minutes, _ = str(duration_str).split(' ')[-1].split(':')  # Extract hours and minutes
+            return int(hours) * 60 + int(minutes)
 
+        # Apply transformation directly to the 'Duration' column
         df['hoursMinutes'] = df['hoursMinutes'].apply(duration_to_minutes)
 
         return df

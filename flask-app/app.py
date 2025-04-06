@@ -10,8 +10,12 @@ import dagshub
 
 app = Flask(__name__)
 
-mlflow.set_tracking_uri('https://dagshub.com/Aman-3110/AirlineFare_EndToEnd.mlflow')
-dagshub.init(repo_owner='Aman-3110',repo_name='AirlineFare_EndToEnd',mlflow=True)
+# mlflow.set_tracking_uri('https://dagshub.com/Aman-3110/AirlineFare_EndToEnd.mlflow')
+# dagshub.init(repo_owner='Aman-3110',repo_name='AirlineFare_EndToEnd',mlflow=True)
+
+
+tracking_uri = "http://localhost:5000"
+mlflow.set_tracking_uri(tracking_uri)
 
 
 def load_model_info() -> dict:
@@ -25,12 +29,18 @@ def load_model_info() -> dict:
 ModelName = "Lasso"
 model_info = load_model_info()
 model_uri = f"runs:/{model_info['run_id']}/{ModelName}"
+print("Test URI :", model_uri)
 
 
 
 try:
     # Load model as a PyFuncModel.
+    print("Loading model...")
+    
     model = mlflow.pyfunc.load_model(model_uri)
+
+    print("Model loaded successfully.")
+
 
     print(model)
 except Exception as e:
@@ -47,9 +57,6 @@ def home():
 @cross_origin()
 
 def predict():
-    if model is None:
-        return "Model not loaded. Please check the server logs for details.", 500
-    
     if request.method=="GET":
         return render_template("home.html")
     
@@ -68,6 +75,7 @@ def predict():
         print(df)
 
         value = receiveData_Obj.execute_pipeline(df)
+        print("Values is: " , value)
         prediction_value = model.predict(value)
         print("----------------------------------------------------")
         print(prediction_value)
@@ -77,5 +85,7 @@ def predict():
     return render_template("home.html")
 
 
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=8080)

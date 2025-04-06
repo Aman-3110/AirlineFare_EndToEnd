@@ -7,7 +7,7 @@ import dagshub
 from mlflow.tracking import MlflowClient
 
 
-class ModelManager:
+class ModelManagerRegister:
     """Class to manage model saving, loading, and registration with MLflow."""
 
     def __init__(self, model_name: str, info_path: str):
@@ -15,12 +15,10 @@ class ModelManager:
         self.info_path = info_path
         #self.client = mlflow.tracking.MlflowClient()
         self.client = MlflowClient()
-
-        mlflow.set_tracking_uri('https://dagshub.com/Aman-3110/AirlineFare_EndToEnd.mlflow')
-        dagshub.init(repo_owner='Aman-3110',repo_name='AirlineFare_EndToEnd',mlflow=True)
-        # self.tracking_uri = "http://localhost:5000"
-        # mlflow.set_tracking_uri(self.tracking_uri)
-
+        # mlflow.set_tracking_uri("https://dagshub.com/SHIVRAJSHINDE/AirlineFare_EndToEnd.mlflow")
+        # dagshub.init(repo_owner='SHIVRAJSHINDE', repo_name='AirlineFare_EndToEnd', mlflow=True)
+        self.tracking_uri = "http://localhost:5000"
+        mlflow.set_tracking_uri(self.tracking_uri)
 
     def save_model_info(self, run_id: str, model_path: str) -> None:
         """Save the model run ID and path to a JSON file."""
@@ -45,6 +43,10 @@ class ModelManager:
         print(model_info)
         print("----------------------------------------------------------------")
         model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
+        # model= "Lasso"    
+
+        # model_uri = f"runs:/{model_info['run_id']}/{model}"
+
         print("----------------------------------------------------------------")
         print(model_uri)
         print("----------------------------------------------------------------")
@@ -59,10 +61,21 @@ class ModelManager:
         
 
 if __name__ == '__main__':
-    model_name="Lasso_model"
+    model_name="Lasso"
     info_path='reports/experiment_info.json'
 
-    model_manager = ModelManager(model_name, info_path)
+    model_manager = ModelManagerRegister(model_name, info_path)
     
     # Load model info and register
     model_manager.register_model()
+
+
+
+
+
+
+
+
+
+
+

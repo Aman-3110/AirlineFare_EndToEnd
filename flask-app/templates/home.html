@@ -13,27 +13,41 @@
 
 </head>
 
+<html>
+
+
 <body>
+
 
     <!-- As a heading -->
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="/">FLIGHT PRICE</a>
+                <a class="navbar-brand" href="/">Flight Price Prediction</a>
+                <title>Flight Price Prediction</title>
+
             </div>
         </div>
     </nav>
 
+
+
+
     <br><br><br>
     <div class="container">
+
+    
+
+
         <form action="\predict" method="post">
+
             <div class="row">
                 <div class="col-sm-6">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Departure Date</h5>
+                            <h5 class="card-title">Date_of_Journey</h5>
                             <!-- Departure -->
-                            <input type="datetime-local" name="Dep_Time" id="Dep_Time" required="required">
+                            <input type="datetime-local" name="Date_of_Journey" id="Date_of_Journey" required="required">
                         </div>
                     </div>
                 </div>
@@ -122,7 +136,8 @@
                                 <option value="Vistara">Vistara</option>
                                 <option value="Air Asia">Air Asia</option>
                                 <option value="GoAir">GoAir</option>
-                                <option value="Multiple carriers Premium economy">Multiple carriers Premium economy</option>
+                                <option value="Multiple carriers Premium economy">Multiple carriers Premium economy
+                                </option>
                                 <option value="Jet Airways Business">Jet Airways Business</option>
                                 <option value="Vistara Premium economy">Vistara Premium economy</option>
                                 <option value="Trujet">Trujet</option>
@@ -146,7 +161,7 @@
         <h3>{{ prediction_text }}</h3>
 
         <br>
-   
+        <br>
 
 
     </div>

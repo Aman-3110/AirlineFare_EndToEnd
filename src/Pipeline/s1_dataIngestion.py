@@ -42,7 +42,6 @@ class DataIngestionClass:
         
 # This block will only execute if this script is run directly
 if __name__ == "__main__":
-    import os
     # source_path = os.path.join("D:", "\\Training", "04DataSets", "01_AirlineData", "Airline.csv")
 
     # print(source_path)

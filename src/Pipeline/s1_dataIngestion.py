@@ -1,35 +1,24 @@
-# import pandas as pd
-
-# class DataIngestionClass:
-#     def __init__(self, source_path:str, destination_path:str):
-#         self.source_path = source_path
-#         self.destination_path = destination_path
-
-#     def read_csv(self):
-#         df = pd.read_csv(self.source_path)
-#         print(df)
-#         return df
-    
-#     def save_csv(self, df):
-#         df.to_csv(self.destination_path, index=False)
-
-# if __name__ == "__main__":
-#     source_path = 'E:\\Codes\\Juypter Notebook\\The XL Academy\\ML\\Airline.csv'
-#     destination_path = 'Data\\01_RawData\\Airline.csv'
-#     file_handler = DataIngestionClass(source_path, destination_path)
-#     df = file_handler.read_csv()
-#     file_handler.save_csv(df)
-
-
 import os
 import pandas as pd
+from pathlib import Path
 
 class DataIngestionClass:
-    def read_csv(source_path):
+
+    def read_csv(OriginalDir,OriginalFile):
+        # source_path = r"D:/Data/01_AirlineData/Airline.csv"  # Raw string
+
         # Read the CSV file and return the DataFrame
-        df = pd.read_csv(source_path)
-        print(df)
-        return df
+        try:
+
+            file_path = os.path.join(OriginalDir,OriginalFile)
+            print(file_path)
+            df = pd.read_csv(file_path)
+            
+            return df
+
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+            return None
 
     def save_file(df, directory, filename):
         # Check if the directory exists, create it if it doesn't
@@ -40,24 +29,31 @@ class DataIngestionClass:
             print(f"Directory '{directory}' already exists.")
 
         # Construct the file path
+        
         file_path = os.path.join(directory, filename)
+        print(file_path)
         
         # Save the DataFrame to the file
         df.to_csv(file_path, index=False)  # index=False to avoid writing row indices
+        print(df)
+        print("----------------------------------------------------")
         print(f"File has been saved to {file_path}")
-
+        print("----------------------------------------------------")
+        
 # This block will only execute if this script is run directly
 if __name__ == "__main__":
-    #source_path = 'E:\\Codes\\Juypter Notebook\\The XL Academy\\ML\\Airline.csv'
-    directory = ".Data/01_RawData/"
-    filename = "Airline.csv"
+    import os
+    # source_path = os.path.join("D:", "\\Training", "04DataSets", "01_AirlineData", "Airline.csv")
 
-    #df = DataIngestionClass.read_csv(source_path)  # Read the CSV file
-    #DataIngestionClass.save_file(df, directory, filename)  # Save the DataFrame to the destination
-
-
+    # print(source_path)
     OriginalDir = "./OriginalFolder/"
     OriginalFile = "Airline.csv"
-    
+    # source_path = "D:\\DataSets\\01_AirlineData\\Airline.csv"  # Use Pathlib to build the path
+    # df = pd.read_csv(r"C:/Users/SHIVRAJ SHINDE/JupiterWorking/XL_ML/Z_DataSets/01_AirlineData/Airline.csv")
+    # print(df)
+
+    directory = "./Data/01_RawData/"
+    filename = "Airline.csv"
+
     df = DataIngestionClass.read_csv(OriginalDir,OriginalFile)  # Read the CSV file
     DataIngestionClass.save_file(df, directory, filename)  # Save the DataFrame to the destination

@@ -140,10 +140,10 @@ class MLflowLoggerClass:
 # Main script execution
 if __name__ == "__main__":
 
-    X_train_Dir = "./Data/04_encoded_Data/"
+    X_train_Dir = "./Data/04_Encoded_Data/"
     X_train_File = "X_train.csv"
 
-    y_train_path = "./Data/04_encoded_Data/"
+    y_train_path = "./Data/04_Encoded_Data/"
     y_train_File = "y_train.csv"
 
     params_path = "./modelsParams.yaml"

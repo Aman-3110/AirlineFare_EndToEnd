@@ -131,7 +131,7 @@ if __name__ == "__main__":
     obj.makeTransformerFile(pipe)
 
 
-    obj.save_dataframe(X_train_transformed, "./Data/04_encoded_Data/X_train.csv")
-    obj.save_dataframe(X_test_transformed, "./Data/04_encoded_Data/X_test.csv")
-    obj.save_dataframe(y_train, "./Data/04_encoded_Data/y_train.csv")
-    obj.save_dataframe(y_test, "./Data/04_encoded_Data/y_test.csv")
+    obj.save_dataframe(X_train_transformed, "./Data/04_Encoded_Data/X_train.csv")
+    obj.save_dataframe(X_test_transformed, "./Data/04_Encoded_Data/X_test.csv")
+    obj.save_dataframe(y_train, "./Data/04_Encoded_Data/y_train.csv")
+    obj.save_dataframe(y_test, "./Data/04_Encoded_Data/y_test.csv")

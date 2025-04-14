@@ -48,9 +48,16 @@ class DataIngestionClass:
 
 # This block will only execute if this script is run directly
 if __name__ == "__main__":
-    source_path = 'E:\\Codes\\Juypter Notebook\\The XL Academy\\ML\\Airline.csv'
-    directory = "Data/01_RawData/"
+    #source_path = 'E:\\Codes\\Juypter Notebook\\The XL Academy\\ML\\Airline.csv'
+    directory = ".Data/01_RawData/"
     filename = "Airline.csv"
 
-    df = DataIngestionClass.read_csv(source_path)  # Read the CSV file
+    #df = DataIngestionClass.read_csv(source_path)  # Read the CSV file
+    #DataIngestionClass.save_file(df, directory, filename)  # Save the DataFrame to the destination
+
+
+    OriginalDir = "./OriginalFolder/"
+    OriginalFile = "Airline.csv"
+    
+    df = DataIngestionClass.read_csv(OriginalDir,OriginalFile)  # Read the CSV file
     DataIngestionClass.save_file(df, directory, filename)  # Save the DataFrame to the destination

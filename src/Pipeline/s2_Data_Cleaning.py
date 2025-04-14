@@ -1,5 +1,7 @@
 import pandas as pd 
 import os
+from src.Utils.exception import CustomException
+import sys
 
 class DataCleaningClass:
     def __init__(self):
@@ -13,6 +15,30 @@ class DataCleaningClass:
     def read_csv(self, file_path: str) -> pd.DataFrame:
         df = pd.read_csv(file_path)
         return df
+    
+
+    def read_csv_as_dataframe(self,raw_file_dir,raw_file) -> pd.DataFrame:
+
+        # Combine the folder and file path into a full path
+        # full_path = os.path.join(folder, file)
+        
+        file_path = os.path.join(raw_file_dir,raw_file)
+
+        print(file_path)
+        # Read the CSV file into a DataFrame
+        try:
+            df = pd.read_csv(file_path)
+            
+            return df
+        
+        except Exception as e:
+            print(CustomException(e,sys))
+            return None
+        except Exception as e:
+            print(CustomException(e,sys))
+            return None
+        
+
     
     def clean_total_stops(self, df: pd.DataFrame) -> pd.DataFrame:
         mode_of_total_stops = df['Total_Stops'].mode()[0]
@@ -102,12 +128,21 @@ class DataCleaningClass:
 
 
 if __name__ == "__main__":
-    raw_file_path = 'Data/01_RawData/Airline.csv'
-    directory = "Data/02_CleanedData/"
+    #raw_file_path = 'Data/01_RawData/Airline.csv'
+    #directory = "Data/02_CleanedData/"
+    #filename = "CleanedData.csv"
+
+    raw_file_dir = "./Data/01_RawData/"
+    raw_file = "Airline.csv"
+    directory = "./Data/02_CleanedData/"
     filename = "CleanedData.csv"
 
+
     data_cleaning_obj = DataCleaningClass()
-    df = data_cleaning_obj.read_csv(raw_file_path)
+    df = data_cleaning_obj.read_csv_as_dataframe(raw_file_dir,raw_file)
+
+    #df = data_cleaning_obj.read_csv(raw_file_path)
+
     df = data_cleaning_obj.clean_total_stops(df)
     df = data_cleaning_obj.clean_airline_column(df)
     df = data_cleaning_obj.clean_destination_column(df)

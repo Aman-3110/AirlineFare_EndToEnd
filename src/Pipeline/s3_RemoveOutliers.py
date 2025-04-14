@@ -1,49 +1,84 @@
+import os
+import sys
 import pandas as pd
 import yaml
+from src.Utils.exception import CustomException
 
-class RemoveOutliersClass:
-    def __init__(self, file_path: str, yaml_path: str):
-        self.df = pd.read_csv(file_path)
-        self.yaml_path = yaml_path
+
+class RemoveOutlier:
+    def read_csv(self,cleaned_dir,filename):
+        # source_path = r"D:/Data/01_AirlineData/Airline.csv"  # Raw string
+
+        # Read the CSV file and return the DataFrame
+        try:
+            file_path = os.path.join(cleaned_dir,filename)
+            print(file_path)
+            df = pd.read_csv(file_path)
+            
+            return df
+        except Exception as e:
+            print(CustomException(e,sys))
+            return None
+
+
+    def load_yaml(self, yaml_path):
+        yaml_path = os.path.join(yaml_path)
+        with open(yaml_path, 'r') as file:
+            data = yaml.safe_load(file)
+            return data.get('airlineName', {})
+
+    def remove_outliers(self, df, airlineName):
+        cleaned_df = pd.DataFrame(columns=df.columns)
         
-        self.cleaned_df = pd.DataFrame(columns=list(self.df.columns))
-
-    def load_yaml(self):
-        with open(self.yaml_path, 'r') as file:
-            data = yaml.safe_load(file) 
-            print(data['airlineName'])
-            return data['airlineName']
-
-    def remove_outliers(self,airlineName):
-        print(airlineName)
         for airline, quartiles in airlineName.items():
-            airDataset = self.df[self.df['Airline'] == airline]
-
-            q1 = airDataset['Price'].quantile(quartiles[0])
-            q3 = airDataset['Price'].quantile(quartiles[1])
+            airDataSet = df[df['Airline'] == airline]
+            q1 = airDataSet['Price'].quantile(quartiles[0])
+            q3 = airDataSet['Price'].quantile(quartiles[1])
             IQR = q3 - q1
             lowerLimit = q1 - IQR * 1.5
             upperLimit = q3 + IQR * 1.5
+            
+            lowerLimitIndex = airDataSet[airDataSet['Price'] <= lowerLimit].index
+            upperLimitIndex = airDataSet[airDataSet['Price'] >= upperLimit].index
+            
+            if airDataSet.shape[0] > 5:
+                airDataSet = airDataSet.drop(lowerLimitIndex).drop(upperLimitIndex)
+            
+            cleaned_df = pd.concat([cleaned_df, airDataSet], axis=0)
+        
+        return cleaned_df
 
-            lowerLimitIndex = airDataset[airDataset['Price'] <= lowerLimit].index
-            upperLimitIndex = airDataset[airDataset['Price'] >= upperLimit].index
+    def save_file(self, df: pd.DataFrame, directory: str, filename: str) -> None:
+        """Saves the DataFrame to a CSV file in the specified directory."""
+        try:
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+                print(f"Directory '{directory}' was created.")
+                file_path = os.path.join(directory, filename)
+                df.to_csv(file_path, index=False)
+                print(f"File has been saved to {file_path}")
 
-            if airDataset.shape[0] > 5:
-                airDataset.drop(lowerLimitIndex, axis=0, inplace=True)
-                airDataset.drop(upperLimitIndex, axis=0, inplace=True)
+            else:
+                print(f"Directory '{directory}' already exists.")
 
-            self.cleaned_df = pd.concat([self.cleaned_df, airDataset], axis=0)
-        return self.cleaned_df 
-    
-    def save_file(self, noOutlierDataFilePath):
-        self.cleaned_df.to_csv(noOutlierDataFilePath, index=False)
+                file_path = os.path.join(directory, filename)
+                df.to_csv(file_path, index=False)
+                print(f"File has been saved to {file_path}")
+
+        except Exception as e:
+            print(CustomException(e,sys))
+
 
 if __name__ == "__main__":
-    file_path = 'Data/02_CleanedData/CleanedData.csv'
-    yaml_path = "constants.yaml"
-    noOutlierDataFilePath = 'Data/03_noOutlierData/noOutlierDataFile.csv'
+    cleaned_dir = "./Data/02_CleanedData/"
+    filename = "./CleanedData.csv"
+    yaml_path = "./constants.yaml"
+    noOutlier_Dir = "./Data/03_noOutlierData/"
+    noOutlier_File = "noOutlierDataFile.csv"
 
-    RemoveOutliersObj = RemoveOutliersClass(file_path, yaml_path)
-    airlineName = RemoveOutliersObj.load_yaml() 
-    RemoveOutliersObj.remove_outliers(airlineName)
-    RemoveOutliersObj.save_file(noOutlierDataFilePath)
+
+    remover = RemoveOutlier()
+    df = remover.read_csv(cleaned_dir,filename)
+    airlineName = remover.load_yaml(yaml_path)
+    cleaned_df = remover.remove_outliers(df, airlineName)
+    remover.save_file(df,noOutlier_Dir, noOutlier_File)
